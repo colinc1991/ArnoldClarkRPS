@@ -10,13 +10,13 @@ using System.Windows.Forms;
 
 namespace ArnoldClarkRPS
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         // global variables
         byte playerScore;
         byte opponentScore;
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
             playerScore = 0;
@@ -32,14 +32,12 @@ namespace ArnoldClarkRPS
         {
             try
             {
-                // local variables
+                // assign the players gesture to the selected value of the listbox
                 string playerGesture = listBoxPlayer.SelectedItem.ToString();
-                Random randNumGen = new Random();
-                int randNum = randNumGen.Next(1, 6);
-
+                
 
                 // assign opponent a "gesture"
-                string opponentGesture = ChooseGesture(randNum);
+                string opponentGesture = ChooseGesture();
                 lblOpponentChoice.Text = $"Your opponent has chosen {opponentGesture}.";
 
 
@@ -151,13 +149,15 @@ namespace ArnoldClarkRPS
         #region Form methods
 
         /// <summary>
-        /// This method takes in a number (between 1 and 5) which is then used to determine the opponent's gesture.
+        /// This method uses a random number (between 1 and 5) to determine the opponent's gesture.
         /// </summary>
-        /// <param name="randNumIn">Random number used to determine opponent's gesture.</param>
         /// <returns>Returns a string used to contain the opponent's gesture.</returns>
-        private string ChooseGesture(int randNumIn)
+        private string ChooseGesture()
         {
-            switch (randNumIn)
+            Random randNumGen = new Random();
+            int randNum = randNumGen.Next(1, 6);
+
+            switch (randNum)
             {
                 case 1:
                     return "Rock";
