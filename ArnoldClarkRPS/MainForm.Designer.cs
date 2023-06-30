@@ -53,9 +53,11 @@
             this.listBoxPlayer.Name = "listBoxPlayer";
             this.listBoxPlayer.Size = new System.Drawing.Size(139, 89);
             this.listBoxPlayer.TabIndex = 0;
+            this.listBoxPlayer.SelectedIndexChanged += new System.EventHandler(this.listBoxPlayer_SelectedIndexChanged);
             // 
             // btnPlay
             // 
+            this.btnPlay.Enabled = false;
             this.btnPlay.Location = new System.Drawing.Point(12, 147);
             this.btnPlay.Name = "btnPlay";
             this.btnPlay.Size = new System.Drawing.Size(139, 32);

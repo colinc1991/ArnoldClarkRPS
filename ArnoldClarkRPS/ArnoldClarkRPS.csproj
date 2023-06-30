@@ -46,20 +46,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseClass.cs" />
+    <Compile Include="Classes\BaseClass.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Lizard.cs" />
-    <Compile Include="Paper.cs" />
+    <Compile Include="Classes\Lizard.cs" />
+    <Compile Include="Classes\Paper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Rock.cs" />
-    <Compile Include="Scissors.cs" />
-    <Compile Include="Spock.cs" />
+    <Compile Include="Classes\Rock.cs" />
+    <Compile Include="Classes\Scissors.cs" />
+    <Compile Include="Classes\Spock.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

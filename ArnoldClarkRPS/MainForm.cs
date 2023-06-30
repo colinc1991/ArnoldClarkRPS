@@ -1,11 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ArnoldClarkRPS
@@ -15,6 +9,7 @@ namespace ArnoldClarkRPS
         // global variables
         byte playerScore;
         byte opponentScore;
+        readonly BaseClass baseClass;
 
         public MainForm()
         {
@@ -23,6 +18,7 @@ namespace ArnoldClarkRPS
             opponentScore = 0;
             lblOpponentChoice.Text = "";
             lblOutcome.Text = "";
+            baseClass = new BaseClass();
         }
 
 
@@ -30,106 +26,28 @@ namespace ArnoldClarkRPS
 
         private void BtnPlay_Click(object sender, EventArgs e)
         {
-            try
+            // assign the players gesture to the selected value of the listbox
+            string playerGesture = listBoxPlayer.SelectedItem.ToString();
+
+
+            // assign opponent a "gesture"
+            string opponentGesture = ChooseGesture();
+            lblOpponentChoice.Text = $"Your opponent has chosen {opponentGesture}.";
+
+
+            // if both players have same gesture, game is a draw
+            if (playerGesture == opponentGesture)
             {
-                // assign the players gesture to the selected value of the listbox
-                string playerGesture = listBoxPlayer.SelectedItem.ToString();
-                
-
-                // assign opponent a "gesture"
-                string opponentGesture = ChooseGesture();
-                lblOpponentChoice.Text = $"Your opponent has chosen {opponentGesture}.";
-
-
-                // if both players have same gesture, game is a draw
-                if (playerGesture == opponentGesture)
-                {
-                    lblOutcome.Text = "Draw!";
-                }
-
-
-                // otherwise players must have different gestures
-                // depending on what the player has chosen, instantiate the relevant class and call the GameResult() method
-                else
-                {
-                    if (playerGesture == "Rock")
-                    {
-                        Rock myRock = new Rock();
-
-                        if (myRock.GetStrengths().Contains(opponentGesture))
-                        {
-                            GameResult(true, playerGesture, opponentGesture);
-                        }
-                        else
-                        {
-                            GameResult(false, playerGesture, opponentGesture);
-                        }
-                    }
-
-                    else if (playerGesture == "Paper")
-                    {
-                        Paper myPaper = new Paper();
-
-                        if (myPaper.GetStrengths().Contains(opponentGesture))
-                        {
-                            GameResult(true, playerGesture, opponentGesture);
-                        }
-                        else
-                        {
-                            GameResult(false, playerGesture, opponentGesture);
-                        }
-                    }
-
-                    else if (playerGesture == "Scissors")
-                    {
-                        Scissors myScissors = new Scissors();
-
-                        if (myScissors.GetStrengths().Contains(opponentGesture))
-                        {
-                            GameResult(true, playerGesture, opponentGesture);
-                        }
-                        else
-                        {
-                            GameResult(false, playerGesture, opponentGesture);
-                        }
-                    }
-
-                    else if (playerGesture == "Spock")
-                    {
-                        Spock mySpock = new Spock();
-
-                        if (mySpock.GetStrengths().Contains(opponentGesture))
-                        {
-                            GameResult(true, playerGesture, opponentGesture);
-                        }
-                        else
-                        {
-                            GameResult(false, playerGesture, opponentGesture);
-                        }
-                    }
-
-                    else if (playerGesture == "Lizard")
-                    {
-                        Lizard myLizard = new Lizard();
-
-                        if (myLizard.GetStrengths().Contains(opponentGesture))
-                        {
-                            GameResult(true, playerGesture, opponentGesture);
-                        }
-                        else
-                        {
-                            GameResult(false, playerGesture, opponentGesture);
-                        }
-                    }
-                }
+                lblOutcome.Text = "Draw!";
+                return;
             }
 
 
-            // user has not chosen a gesture
-            catch (NullReferenceException)
-            {
-                MessageBox.Show("Please choose a gesture.", "Gesture not chosen", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+            // otherwise players must have different gestures
+            // depending on what the player has chosen, instantiate the relevant class and call the GameResult() method
+            var gestureClass = baseClass.GetChildClass(playerGesture);
+
+            GameResult(gestureClass.GetStrengths().Contains(opponentGesture), playerGesture, opponentGesture);
         }
 
         /// <summary>
@@ -141,7 +59,11 @@ namespace ArnoldClarkRPS
         {
             ResetGame();
         }
-
+        
+        private void listBoxPlayer_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            btnPlay.Enabled = true;
+        }
         #endregion
 
 
@@ -182,16 +104,17 @@ namespace ArnoldClarkRPS
         /// <param name="opponentGestureIn">The opponent's gesture.</param>
         private void GameResult(bool playerHasWon, string playerGestureIn, string opponentGestureIn)
         {
+            string verb = playerHasWon ? "win" : "lose";
+            lblOutcome.Text = $"You {verb} because {(playerHasWon ? playerGestureIn : opponentGestureIn)} {GetVerb(playerGestureIn, opponentGestureIn)} {(playerHasWon ? opponentGestureIn : playerGestureIn)}.";
+            
             if (playerHasWon)
             {
                 playerScore++;
-                lblOutcome.Text = $"You win because {playerGestureIn} {GetVerb(playerGestureIn, opponentGestureIn)} {opponentGestureIn}.";
             }
 
             else
             {
                 opponentScore++;
-                lblOutcome.Text = $"You lose because {opponentGestureIn} {GetVerb(playerGestureIn, opponentGestureIn)} {playerGestureIn}.";
             }
 
             DisplayScores();
@@ -211,56 +134,54 @@ namespace ArnoldClarkRPS
         /// <returns>Returns the appropriate verb based on the supplied input.</returns>
         private string GetVerb(string gestureOne, string gestureTwo)
         {
+            List<string> combinedGestures = new List<string>() { gestureOne, gestureTwo};
             // initial if statement is slightly more complicated because "crushes" applies to both scissors and lizard
-            if ((gestureOne == "Rock" && (gestureTwo == "Scissors" || gestureTwo == "Lizard")) || ((gestureOne == "Scissors" || gestureOne == "Lizard") && gestureTwo == "Rock"))
+            if (combinedGestures.Contains("Rock") && (combinedGestures.Contains("Scissors") || combinedGestures.Contains("Lizard")))
             {
                 return "crushes";
             }
 
-            else if ((gestureOne == "Paper" && gestureTwo == "Rock") || (gestureOne == "Rock" && gestureTwo == "Paper"))
+            if (combinedGestures.Contains("Paper") && combinedGestures.Contains("Rock"))
             {
                 return "covers";
             }
 
-            else if ((gestureOne == "Scissors" && gestureTwo == "Paper") || (gestureOne == "Paper" && gestureTwo == "Scissors"))
+            if (combinedGestures.Contains("Paper") && combinedGestures.Contains("Scissors"))
             {
                 return "cuts";
             }
 
-            else if ((gestureOne == "Lizard" && gestureTwo == "Spock") || (gestureOne == "Spock" && gestureTwo == "Lizard"))
+            if (combinedGestures.Contains("Lizard") && combinedGestures.Contains("Spock"))
             {
                 return "poisons";
             }
 
-            else if ((gestureOne == "Spock" && gestureTwo == "Scissors") || (gestureOne == "Scissors" && gestureTwo == "Spock"))
+            if (combinedGestures.Contains("Spock") && combinedGestures.Contains("Scissors"))
             {
                 return "smashes";
             }
 
-            else if ((gestureOne == "Scissors" && gestureTwo == "Lizard") || (gestureOne == "Lizard" && gestureTwo == "Scissors"))
+            if (combinedGestures.Contains("Scissors") && combinedGestures.Contains("Lizard"))
             {
                 return "decapitates";
             }
 
-            else if ((gestureOne == "Paper" && gestureTwo == "Lizard") || (gestureOne == "Lizard" && gestureTwo == "Paper"))
+            if (combinedGestures.Contains("Paper") && combinedGestures.Contains("Lizard"))
             {
                 return "eats";
             }
 
-            else if ((gestureOne == "Paper" && gestureTwo == "Spock") || (gestureOne == "Spock" && gestureTwo == "Paper"))
+            if (combinedGestures.Contains("Paper") && combinedGestures.Contains("Spock"))
             {
                 return "disproves";
             }
 
-            else if ((gestureOne == "Spock" && gestureTwo == "Rock") || (gestureOne == "Rock" && gestureTwo == "Spock"))
+            if (combinedGestures.Contains("Spock") && combinedGestures.Contains("Rock"))
             {
                 return "vaporises";
             }
 
-            else
-            {
-                return "beats";
-            }
+            return "beats";
         }
 
         /// <summary>
